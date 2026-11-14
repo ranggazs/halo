@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Happy Sunday, Ryanti ☀️💌</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--pk:#ff4d8d;--pk2:#ff8fb8;--soft:#fff0f6;--line:#ffc2d9;--text:#5b3a49;--muted:#8a6577}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;font-family:'Fredoka',system-ui,sans-serif;color:var(--text);background:linear-gradient(135deg,#fff5f9 0%,#ffe0ee 50%,#ffcfe3 100%);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.card{background:rgba(255,255,255,.92);border:2px solid #fff;box-shadow:0 18px 45px rgba(255,77,141,.18)}
+.box{background:#fff;border:2px solid var(--line)}
+.btn{background:linear-gradient(135deg,var(--pk2),var(--pk));color:#fff;font-weight:600;transition:.2s;box-shadow:0 8px 18px -6px rgba(255,77,141,.55)}
+.btn:hover:not(:disabled){transform:translateY(-2px)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.hand{font-family:'Caveat',cursive}
+.muted{color:var(--muted)}
+.slide{display:none;flex-direction:column;align-items:center;text-align:center;animation:in .5s ease}
+.slide.on{display:flex}
+@keyframes in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.shake{animation:shake .25s infinite}
+@keyframes beat{0%,100%{transform:scale(1)}30%{transform:scale(1.2)}}
+.beat{animation:beat 1.2s infinite}
+input[type=range]{width:100%;accent-color:#ff4d8d}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.on-pk{background:linear-gradient(135deg,#ff8fb8,#ff4d8d)!important;color:#fff!important;border-color:#ff4d8d!important}
+.letter p{margin:0 0 .75rem}
+</style>
+</head>
+<body class="flex flex-col items-center p-4">
+<canvas id="fx"></canvas>
+<!-- Ganti "LAGU_KAMU_DISINI.mp3" dengan nama file lagumu -->
+<audio id="bgm" loop preload="auto"><source src="lagu.mp3" type="audio/mpeg"></audio>
+
+<header class="relative z-10 w-full max-w-lg flex items-center justify-between card rounded-full px-4 py-2 mt-1">
+  <div id="dots" class="flex gap-1"></div>
+  <span id="lbl" class="text-xs font-medium" style="color:var(--pk)">1 / 15</span>
+  <button id="mbtn" onclick="toggleMusic()" class="text-xs font-semibold px-3 py-1.5 rounded-full bg-pink-100 text-pink-600">🎵 Musik: Off</button>
+</header>
+<main class="relative z-10 w-full max-w-lg my-4"><div id="stage" class="card rounded-3xl p-6"></div></main>
+<footer class="relative z-10 text-xs muted pb-2 text-center">Dibuat dengan tulus dan banyak senyuman untuk <b style="color:var(--pk)">Ryanti Fercilia Rondo</b> 🌸</footer>
+
+<script>
+const TOTAL=15, MUSIC_START=9; // musik mulai otomatis di slide 9 (Pengakuan)
+const $=id=>document.getElementById(id);
+const bgm=$('bgm');let musicOn=false,manual=false,cur=1;
+const em=e=>`<div class="text-5xl mb-2 beat">${e}</div>`;
+const H=t=>`<h2 class="text-xl font-bold mb-3" style="color:#d6336c">${t}</h2>`;
+const P=a=>`<div class="letter box w-full rounded-2xl p-4 text-left text-sm leading-relaxed mb-2">${a.map(x=>`<p>${x}</p>`).join('')}</div>`;
+
+const S=[
+/*1*/`${em('💌')}<span class="px-3 py-1 rounded-full bg-pink-100 text-pink-600 text-xs font-semibold mb-2">☀️ HAPPY SUNDAY ☀️</span>
+<h1 class="text-2xl font-bold mb-2">Happy Sunday, <span style="color:var(--pk)">Ryanti Fercilia Rondo!</span> 🌸</h1>
+<p class="text-sm muted mb-4">Selamat hari Minggu! Semoga hari ini menyenangkan dan penuh hal baik buat kamu. Ada halaman kecil yang dibuat khusus buat kamu hari ini. Karena isinya lumayan panjang, siapkan dirimu dan baca pelan-pelan yaa. Tapi baca peringatan pentingnya dulu 👇</p>
+<div class="w-full text-left text-sm rounded-2xl p-3 mb-4 border-2 border-dashed border-pink-300 bg-pink-50 text-pink-900"><b>⚠️ Peringatan Medis Penting:</b> membuka pesan ini bisa menyebabkan gejala <em>senyum-senyum sendiri tanpa sadar</em>, pipi agak hangat, dan bingung mau bereaksi apa. Tapi tenang, 100% aman kok!</div>
+<p id="tip" class="text-sm min-h-[22px] mb-3" style="color:var(--pk)">Siap buka pesannya sekarang? 😊</p>
+<div class="w-full min-h-[110px] flex flex-col items-center justify-center gap-3">
+<button onclick="start()" class="btn px-6 py-3.5 rounded-2xl w-full">Buka Pesannya 💌</button>
+<button id="run" onmouseenter="dodge()" onclick="dodge()" class="box px-5 py-3 rounded-2xl text-sm transition-transform duration-200">Nggak Mau Buka 😝</button></div>`,
+
+/*2*/`${em('🔬')}${H('Alat Ukur Efek “Ryanti” 📈')}
+<p class="text-sm muted mb-3">Sebelum masuk ke pesan yang sebenarnya, kita lakukan tes ilmiah super serius dulu. Pilih satu alasan kenapa <b>Ryanti</b> sering bikin orang salah fokus:</p>
+<div class="w-full space-y-2 mb-4 text-left text-sm">
+<button class="q box w-full p-3 rounded-xl" onclick="quiz(this,'Senyumnya memang manis banget! ☕🌸')">A. Kalau lagi senyum, manisnya kebangetan 😊</button>
+<button class="q box w-full p-3 rounded-xl" onclick="quiz(this,'Auranya positif dan asik dilihat ✨')">B. Cara dia jadi diri sendiri yang apa adanya ✨</button>
+<button class="q box w-full p-3 rounded-xl" onclick="quiz(this,'Fix valid 1000%! Paket lengkap 😆💖')">C. Dua-duanya bener! Bikin kagum terus 🤭</button></div>
+<div class="box w-full rounded-2xl p-3 mb-2" id="mbox"><div class="flex justify-between text-xs font-semibold" style="color:var(--pk)"><span>Tingkat Kegemasan Ryanti</span><b id="mval">0%</b></div>
+<div class="h-3 rounded-full bg-pink-100 mt-2 overflow-hidden"><div id="mbar" class="h-full w-0 bg-gradient-to-r from-pink-400 to-rose-300 transition-all duration-500"></div></div>
+<p id="mst" class="text-xs muted mt-2 italic">👆 Klik salah satu jawaban buat mulai mengukur!</p></div>`,
+
+/*3*/`${em('🔋')}${H('Bantu Kumpulin Nyali!')}
+<p class="text-sm muted mb-3">Jujur, aku butuh sedikit dorongan untuk jujur. <b>Spam-klik (ketuk cepat)</b> tombol petir di bawah buat ngisi baterai nyaliku sampai 100%!</p>
+<div class="box w-full rounded-2xl p-3 mb-4">
+<div class="h-4 rounded-full bg-pink-100 overflow-hidden relative"><div id="cbar" class="h-full w-0 bg-gradient-to-r from-pink-400 to-rose-400 transition-all duration-100"></div><span id="ctxt" class="absolute inset-0 text-[10px] font-bold text-center mt-0.5 text-pink-800">0%</span></div>
+<p id="cst" class="text-xs mt-2 font-semibold" style="color:var(--pk)">Ayo ketuk yang cepat!! 🔥</p></div>
+<button id="cbtn" onclick="tapC()" class="w-24 h-24 rounded-full text-4xl shadow-lg active:scale-90 transition-transform" style="background:var(--soft);border:3px solid var(--pk)">⚡</button>`,
+
+/*4*/`<div id="h4" class="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center text-3xl mb-2">💓</div>${H('Tingkat Deg-degan Rangga 📈')}
+<p class="text-sm muted mb-3">Nyali udah terisi penuh berkat kamu! Tapi sekarang geser slider di bawah ini sampai mentok buat lihat seberapa deg-degannya <b>Rangga Sudirman</b> pas bikin halaman ini!</p>
+<div id="sbox" class="box w-full rounded-2xl p-5 mb-2"><input type="range" min="0" max="100" value="0" oninput="slide(this.value)">
+<div class="flex justify-between text-xs muted mt-2"><span>Santai</span><b id="sv" style="color:var(--pk)">0%</b><span>Panik!</span></div></div>`,
+
+/*5*/`${em('🌷')}${H('Awal Ceritanya')}${P([
+'Hai Ryanti. Tadi sudah seru-seruan sedikit supaya kamu nggak tegang membaca ini, hehe. Mulai dari sini, aku mau bercerita dengan lebih jujur dan lebih pelan.',
+'Aku nggak ingat persis kapan semuanya dimulai, tapi yang pasti perasaan ini sudah agak lama kusimpan. Rasanya bukan satu momen besar yang tiba-tiba, tapi banyak hal kecil yang pelan-pelan menumpuk: obrolan ringan, tawa kecil, dan caramu menanggapi sesuatu.',
+'Awalnya aku kira itu hanya rasa kagum biasa. Tapi makin lama aku sadar, kehadiranmu selalu meninggalkan perasaan hangat yang bertahan lebih lama dari obrolannya sendiri.'])}`,
+
+/*6*/`${em('🎁')}${H('3 Hal yang Kukagumi dari Kamu')}<p class="text-sm muted mb-3">Ketuk ketiga kartu ini satu per satu 👇</p>
+<div class="w-full space-y-2.5 text-sm">
+<button class="cx box w-full p-4 rounded-2xl text-left" onclick="oc(this,'<b>① Senyummu.</b> Senyummu punya cara sendiri untuk mengubah suasana. Hari yang tadinya biasa saja bisa terasa lebih hangat hanya karena kamu tersenyum.','g1',6)">① Ketuk untuk buka 🤍</button>
+<button class="cx box w-full p-4 rounded-2xl text-left" onclick="oc(this,'<b>② Kamu apa adanya.</b> Kamu nggak berusaha jadi orang lain. Caramu bercerita dan tertawa terasa jujur, dan itu bikin gemas.','g1',6)">② Ketuk untuk buka 🤍</button>
+<button class="cx box w-full p-4 rounded-2xl text-left" onclick="oc(this,'<b>③ Kebaikan kecilmu.</b> Hal-hal sederhana seperti mendengarkan orang lain dengan sungguh-sungguh. Itu yang paling membekas buatku.','g1',6)">③ Ketuk untuk buka 🤍</button></div>`,
+
+/*7*/`${em('📸')}${H('Hal-hal Kecil yang Kuingat')}${P([
+'Ada banyak detail kecil tentangmu yang entah kenapa selalu nyangkut di kepalaku. Cara kamu tertawa waktu sesuatu benar-benar lucu, cara kamu bercerita dengan semangat, bahkan cara kamu mengatakan hal-hal sederhana dengan nada yang khas.',
+'Mungkin buatmu itu semua biasa saja. Tapi buatku, justru hal-hal biasa itulah yang membuat kamu terasa istimewa. Kamu nggak perlu melakukan apa-apa yang luar biasa; menjadi dirimu sendiri saja sudah lebih dari cukup untuk membuat seseorang merasa beruntung bisa mengenalmu.'])}`,
+
+/*8*/`${em('🗝️')}${H('Kenapa Aku Berani Cerita')}${P([
+'Mungkin kamu bertanya-tanya, kenapa aku memilih menyampaikannya lewat halaman seperti ini. Jawabannya sederhana: aku ingin kamu membaca semuanya dengan tenang, tanpa tatapan yang bikin canggung, dan tanpa tekanan untuk langsung memikirkan jawaban.',
+'Aku ingin menyampaikannya dengan cara yang sopan dan lucu. Aku nggak mau perasaan ini jadi beban yang disimpan sendirian, tapi aku juga nggak mau menyampaikannya dengan cara yang membuatmu nggak nyaman.',
+'Jadi anggap saja ini surat kecil yang boleh kamu baca kapan saja, sepelan yang kamu mau.'])}`,
+
+/*9*/`${em('🌸')}${H('Untuk Ryanti Fercilia Rondo 💌')}
+<div class="box w-full rounded-2xl p-4 text-left text-sm mb-2"><p class="hand text-2xl mb-1" style="color:var(--pk)">Hai Ryanti,</p>
+<p class="muted mb-3">Setelah semua cerita tadi, ini bagian paling jujurnya. Gosok kotak rahasia di bawah ini buat lihat isi suratnya!</p>
+<div class="relative w-full h-44 rounded-xl overflow-hidden box bg-pink-50 flex flex-col items-center justify-center p-3 text-center">
+<p class="font-bold text-base" style="color:var(--pk)">“Aku suka sama kamu, Ryanti.” 💖</p>
+<p class="text-xs mt-2 leading-relaxed">Aku beneran kagum sama sosokmu, cara kamu tersenyum, dan caramu jadi diri sendiri yang selalu manis di mataku. Perasaan ini tulus, bukan main-main.</p>
+<p class="hand text-lg text-right w-full border-t border-pink-200 mt-2 pt-1">Dari: Rangga Sudirman</p>
+<canvas id="scratch" class="absolute inset-0 w-full h-full cursor-pointer touch-none"></canvas>
+</div></div>`,
+
+/*10*/`${em('🤲')}${H('Apa yang Kuharapkan (dan Tidak)')}${P([
+'Aku mau jujur soal ini. Aku <b>tidak</b> mengharapkan balasan apa pun, tidak menuntut jawaban, dan tidak menunggu jawaban pasti darimu. Aku juga tidak ingin kamu merasa harus melakukan sesuatu karena sudah membaca ini.',
+'Yang kuharapkan hanya satu: kamu tahu bahwa ada seseorang yang tulus mengagumimu. Itu saja. Apa pun perasaanmu, apa pun yang kamu pilih, semuanya sah dan aku akan menghargainya.',
+'Jadi kamu nggak perlu buru-buru, dan nggak perlu menjawab apa-apa. Kalau suatu hari nanti kamu ingin bercerita, aku ada di sini. Kalau tidak, itu juga baik-baik saja.'])}`,
+
+/*11*/`${em('🕊️')}${H('Jangan Merasa Terbebani Yaa 😊')}
+<div class="box w-full rounded-2xl p-4 text-left text-sm mb-2 space-y-3">
+<p>Ryanti, aku ingin kamu tenang setelah membaca pengakuan tadi. <b>Aku mengungkapkan ini bukan untuk menuntut apa pun.</b> Aku hanya ingin jujur, dan berharap pertemanan kita tetap nyaman seperti biasa. 🌸</p>
+<p class="text-xs font-semibold" style="color:var(--pk)">📌 Centang janji ini dulu biar bisa lanjut:</p>
+<label class="flex gap-3 items-start"><input type="checkbox" class="jk w-5 h-5 accent-pink-500" onchange="chk()"> Kamu nggak wajib balas perasaanku.</label>
+<label class="flex gap-3 items-start"><input type="checkbox" class="jk w-5 h-5 accent-pink-500" onchange="chk()"> Aku janji nggak bakal ngejauh dan bikin canggung.</label>
+<label class="flex gap-3 items-start"><input type="checkbox" class="jk w-5 h-5 accent-pink-500" onchange="chk()"> Aku janji kita tetep asik seperti biasanya! ✨</label></div>`,
+
+/*12*/`${em('🌈')}${H('Harapan untuk Kamu')}<p class="text-sm muted mb-3">Apa pun jawabanmu, ini harapan tulus dari aku. Ketuk satu per satu 👇</p>
+<div class="w-full space-y-2.5 text-sm">
+<button class="cy box w-full p-4 rounded-2xl text-left" onclick="oc(this,'<b>Semoga kamu selalu bahagia.</b> Bukan hanya di hari yang menyenangkan, tapi juga di hari yang berat. Semoga selalu ada hal kecil yang bikin senyum.','g2',0)">① Ketuk untuk buka 🤍</button>
+<button class="cy box w-full p-4 rounded-2xl text-left" onclick="oc(this,'<b>Semoga mimpi-mimpimu tercapai.</b> Apa pun yang sedang kamu usahakan, semoga langkahmu dimudahkan.','g2',0)">② Ketuk untuk buka 🤍</button>
+<button class="cy box w-full p-4 rounded-2xl text-left" onclick="oc(this,'<b>Semoga kamu dikelilingi orang-orang baik.</b> Yang menghargaimu apa adanya, dan membuatmu merasa aman.','g2',0)">③ Ketuk untuk buka 🤍</button></div>`,
+
+/*13*/`${em('✉️')}${H('Surat Penutup')}${P([
+'Happy Sunday sekali lagi, Ryanti ☀️ Semoga Minggumu hangat, tenang, dan penuh senyum. Terima kasih sudah membaca sampai sejauh ini. Aku menghargai waktu yang kamu luangkan untuk semuanya.',
+'Apa pun yang kamu rasakan sekarang, entah senang, kaget, salting, bingung, atau campur aduk, semuanya wajar. Kamu boleh merasakannya dengan caramu sendiri.',
+'Yang pasti, aku bersyukur pernah mengenal sosok sepertimu. Dan apa pun yang terjadi setelah ini, aku akan tetap menghargaimu sebagai seseorang yang istimewa.',
+'<span class="hand text-xl" style="color:var(--pk)">Dengan tulus, Rangga Sudirman 🤍</span>'])}`,
+
+/*14*/`${em('💐')}${H('Makasih Udah Baca, Ryanti! ✨')}<p class="text-sm muted mb-3">Pilih reaksi jujurmu setelah membaca semuanya:</p>
+<div class="grid grid-cols-2 gap-2.5 w-full mb-3 text-xs font-semibold">
+<button class="box p-3 rounded-2xl" onclick="rx(0)"><div class="text-2xl">😊🌸</div>Senyum-senyum Dikit</button>
+<button class="box p-3 rounded-2xl" onclick="rx(1)"><div class="text-2xl">😂✨</div>Ketawa karena Lucu</button>
+<button class="box p-3 rounded-2xl" onclick="rx(2)"><div class="text-2xl">🙈💖</div>Agak Salting Dikit</button>
+<button class="box p-3 rounded-2xl" onclick="rx(3)"><div class="text-2xl">🥺🤍</div>Terharu &amp; Makasih</button></div>
+<div id="rx" class="hidden w-full rounded-2xl p-4 text-left text-white" style="background:linear-gradient(135deg,#ff8fb8,#ff4d8d)"><p id="rxd" class="text-sm mb-3"></p>
+<button onclick="cp()" class="bg-white text-xs font-semibold px-3 py-2 rounded-xl" style="color:var(--pk)">📋 Salin Balasan ke Rangga</button><span id="toast2" class="hidden text-xs ml-2">Tersalin! 💬</span></div>`,
+
+/*15*/`${em('🎟️')}${H('Sertifikat Resmi Hari Ini')}
+<div class="w-full rounded-2xl p-4 mb-4 bg-pink-50 border-2 border-dashed border-pink-300"><p class="text-[11px] uppercase tracking-wider font-semibold" style="color:#b0245e">Dengan ini dinyatakan bahwa</p>
+<p class="hand text-3xl font-bold my-1" style="color:var(--pk)">Ryanti Fercilia Rondo</p>
+<p class="text-xs muted">resmi dinobatkan sebagai alasan Rangga Sudirman senyum-senyum sendiri hari ini, dan sebagai orang yang berhasil membaca 15 halaman penuh perasaan sampai habis. Selamat dan terima kasih! ✨</p></div>
+<div class="flex justify-between w-full"><button onclick="go(1)" class="text-xs underline" style="color:var(--pk)">🔄 Baca Ulang dari Awal</button><button onclick="burst(45)" class="bg-pink-100 text-pink-600 text-xs font-semibold px-4 py-2.5 rounded-xl">🎉 Hujan Hati!</button></div>`
+];
+
+const GATED=[2,3,4,6,9,11];
+$('stage').innerHTML=S.map((h,i)=>{const n=i+1;
+  const nav=n===15?'':`<div class="flex justify-between w-full mt-4">${n>1?`<button onclick="go(${n-1})" class="muted text-sm px-3">← Kembali</button>`:'<span></span>'}${n>1?`<button id="n${n}" ${GATED.includes(n)?'disabled':''} onclick="go(${n+1})" class="btn px-6 py-3 rounded-xl">Lanjut 👉</button>`:''}</div>`;
+  return `<section class="slide${n===1?' on':''}" data-s="${n}">${h}${nav}</section>`}).join('');
+$('dots').innerHTML=Array.from({length:TOTAL},()=>'<span class="h-2 rounded-full transition-all"></span>').join('');
+function paint(){[...$('dots').children].forEach((d,i)=>d.className='h-2 rounded-full transition-all '+(i+1===cur?'w-4 bg-pink-500':i+1<cur?'w-2 bg-pink-400':'w-2 bg-pink-200'));$('lbl').textContent=cur+' / '+TOTAL}
+const un=n=>{const b=$('n'+n);if(b)b.disabled=false};
+function go(n){document.querySelectorAll('.slide').forEach(s=>s.classList.toggle('on',+s.dataset.s===n));cur=n;paint();beep(700);scrollTo(0,0);
+  if(n>=MUSIC_START&&!musicOn&&!manual)playMusic();if([9,13,15].includes(n))burst(24);
+  if(n===9&&!scInit)setTimeout(initSc,200)}
+function mui(){$('mbtn').textContent=musicOn?'🎶 Musik: On':'🎵 Musik: Off'}
+function playMusic(){bgm.play().then(()=>{musicOn=true;mui()}).catch(()=>{})}
+function toggleMusic(){manual=true;if(musicOn){bgm.pause();musicOn=false;mui()}else playMusic()}
+function start(){burst(18);if(MUSIC_START<=1)playMusic();go(2)}
+
+const tips=["Eits nggak kena! Tombolnya licin 😜","Masa Ryanti nggak penasaran sih? 🥺👉👈","Tombolnya lagi cuti hari ini! 🏃‍♂️💨","Kurang cepet tangannya hehe 💌","Tombolnya kabur takut dicuekin 😂"];let dc=0;
+function dodge(){const b=$('run');dc++;if(dc>=6){b.textContent='Yaudah Deh Aku Buka 😆💌';b.onmouseenter=null;b.style.transform='none';b.onclick=start;$('tip').textContent='Udah nyerah aja, takdir berkata klik! 😆✨';return}
+  $('tip').textContent=tips[(dc-1)%tips.length];b.style.transform=`translate(${(Math.random()-.5)*140}px,${(Math.random()-.5)*60}px) rotate(${(Math.random()-.5)*14}deg)`}
+
+function quiz(btn,fb){document.querySelectorAll('.q').forEach(b=>b.classList.remove('on-pk'));btn.classList.add('on-pk');$('mbar').style.width='100%';$('mbox').classList.add('shake');setTimeout(()=>$('mbox').classList.remove('shake'),900);
+  let p=12;const t=setInterval(()=>{p+=Math.floor(Math.random()*850)+320;if(p>=9999){clearInterval(t);$('mval').textContent='9.999% 💥';$('mst').textContent='🚨 Alat ukurnya rusak! '+fb;un(2);burst(20)}else $('mval').textContent=p+'%'},60)}
+
+let clvl=0,civ=null,cfull=false;
+function tapC(){if(cfull)return;clvl+=8;beep(400);if(!civ)civ=setInterval(()=>{if(clvl>0&&!cfull){clvl-=1.5;if(clvl<0)clvl=0;updC()}},100);
+  if(clvl>=100){clvl=100;cfull=true;clearInterval(civ);$('cst').textContent="Nyali MAX! ⚡";$('cbtn').style.display='none';un(3);burst(20);beep(880)}updC()}
+function updC(){$('cbar').style.width=clvl+'%';$('ctxt').textContent=Math.floor(clvl)+'%'}
+
+let hb=null;
+function slide(v){$('sv').textContent=v+'%';const f=+v===100;$('sbox').classList.toggle('shake',f);$('h4').classList.toggle('beat',f);if(f)un(4);if(f&&!hb){beep(80,.3);hb=setInterval(()=>beep(80,.3),700)}else if(!f&&hb){clearInterval(hb);hb=null}}
+
+function oc(b,html,grp,sn){b.innerHTML=html;b.classList.add('on-pk');b.dataset[grp]=1;beep(880);burst(10);
+  if(sn&&document.querySelectorAll(`button[data-${grp}]`).length===3)un(sn)}
+
+let scInit=false;
+function initSc(){if(scInit)return;const cv=$('scratch');if(!cv)return;const cx=cv.getContext('2d');
+  cv.width=cv.offsetWidth;cv.height=cv.offsetHeight;cx.fillStyle='#ffc2d9';cx.fillRect(0,0,cv.width,cv.height);
+  cx.font='bold 16px Fredoka';cx.fillStyle='#ff4d8d';cx.textAlign='center';cx.fillText('✨ Gosok di sini! ✨',cv.width/2,cv.height/2);
+  let dn=false,rv=false;const gp=e=>{const r=cv.getBoundingClientRect();let x=e.clientX,y=e.clientY;if(e.touches){x=e.touches[0].clientX;y=e.touches[0].clientY}return{x:x-r.left,y:y-r.top}};
+  const sc=(x,y)=>{if(rv)return;cx.globalCompositeOperation='destination-out';cx.beginPath();cx.arc(x,y,22,0,Math.PI*2);cx.fill();
+    let d=cx.getImageData(0,0,cv.width,cv.height).data,t=0;for(let i=3;i<d.length;i+=4)if(d[i]<128)t++;
+    if(t/(d.length/4)>0.45){rv=true;cv.style.transition='opacity .6s';cv.style.opacity='0';setTimeout(()=>{cv.style.display='none';burst(30);beep(880);un(9)},600)}};
+  cv.onmousedown=e=>{dn=true;sc(gp(e).x,gp(e).y)};cv.onmousemove=e=>{if(dn)sc(gp(e).x,gp(e).y)};window.addEventListener('mouseup',()=>dn=false);
+  cv.addEventListener('touchstart',e=>{dn=true;sc(gp(e).x,gp(e).y);e.preventDefault()},{passive:false});cv.addEventListener('touchmove',e=>{if(dn)sc(gp(e).x,gp(e).y);e.preventDefault()},{passive:false});
+  window.addEventListener('touchend',()=>dn=false);scInit=true}
+
+function chk(){const a=[...document.querySelectorAll('.jk')].every(c=>c.checked);const b=$('n11');if(b)b.disabled=!a;if(a){burst(15);beep(900)}}
+
+const RX=[['Seneng banget kalau halaman ini bisa bikin kamu senyum. Jangan lupa senyum terus yaa 🌸','Hai Rangga! Aku udah baca semuanya sambil senyum-senyum sendiri 😊🌸 Makasih yaa udah jujur!'],
+['Hahaha syukurlah interaksinya bikin kamu ketawa! Yang penting kamu terhibur 😆','Hahaha Rangga, aku baca sampai habis! Lucu banget interaksinya 😂✨ Makasih yaa!'],
+['Tarik napas dulu yaa 🤭 Ingat janjimu: nggak perlu canggung kok!','Hai Rangga! Jujur agak salting pas baca webnya 🙈💖 Tapi makasih udah nyampein dengan sopan!'],
+['Aku yang makasih karena kamu mau meluangkan waktu membaca semuanya 🥺🤍','Hai Rangga, makasih banyak buat pesan tulusnya 🥺🤍 Aku menghargai kejujuran kamu.']];
+let reply='';
+function rx(i){$('rx').classList.remove('hidden');$('rxd').textContent=RX[i][0];reply=RX[i][1];burst(40);beep(780)}
+function cp(){const ok=()=>{['toast2'].forEach(id=>$(id)&&$(id).classList.remove('hidden'))};
+  const fb=()=>{const t=document.createElement('textarea');t.value=reply;document.body.appendChild(t);t.select();try{document.execCommand('copy');ok()}catch(e){}t.remove()};
+  try{navigator.clipboard.writeText(reply).then(ok).catch(fb)}catch(e){fb()}}
+let ac=null;function beep(f,g=.06){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),n=ac.createGain();o.frequency.value=f;n.gain.setValueAtTime(g,ac.currentTime);n.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.25);o.connect(n);n.connect(ac.destination);o.start();o.stop(ac.currentTime+.26)}catch(e){}}
+const cv=$('fx'),cx=cv.getContext('2d');let ps=[];const hs=['💖','💗','🌸','✨','💕'];
+function rs(){cv.width=innerWidth;cv.height=innerHeight}addEventListener('resize',rs);rs();
+function burst(n){for(let i=0;i<n;i++){const a=Math.random()*6.28,s=Math.random()*7+2.5;ps.push({x:cv.width/2,y:cv.height/2,vx:Math.cos(a)*s,vy:Math.sin(a)*s-2.5,z:Math.random()*14+12,a:1,e:hs[i%5]})}}
+(function loop(){cx.clearRect(0,0,cv.width,cv.height);for(let i=ps.length-1;i>=0;i--){const p=ps[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.14;p.a-=.016;if(p.a<=0){ps.splice(i,1);continue}cx.globalAlpha=p.a;cx.font=p.z+'px serif';cx.fillText(p.e,p.x,p.y)}requestAnimationFrame(loop)})();
+paint();
+</script>
+</body>
+</html>
